@@ -1,0 +1,8 @@
+QuantLib
+numpy
+pytest
+transitions
+gymnasium
+stable-baselines3
+sb3-contrib
+tensorboard

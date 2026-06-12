@@ -1,0 +1,34 @@
+{
+    "initial_state": "normal",
+    "states": [
+        "normal",
+        "margin_call_issued",
+        "grace_period",
+        "default"
+    ],
+    "transitions": [
+        {
+            "trigger": "observe_breach",
+            "source": "normal",
+            "dest": "margin_call_issued"
+        },
+        {
+            "trigger": "elapse_one_day",
+            "source": "margin_call_issued",
+            "dest": "grace_period"
+        },
+        {
+            "trigger": "receive_full_margin",
+            "source": [
+                "margin_call_issued",
+                "grace_period"
+            ],
+            "dest": "normal"
+        },
+        {
+            "trigger": "miss_deadline",
+            "source": "grace_period",
+            "dest": "default"
+        }
+    ]
+}
