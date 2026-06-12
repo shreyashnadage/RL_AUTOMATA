@@ -19,6 +19,8 @@ class FinancialMetricsCallback(BaseCallback):
                     self.logger.record("financial/mean_peak_liquidity", metrics["peak_liquidity"])
                     self.logger.record("financial/rule_violations", metrics["rule_violations"])
                     self.logger.record("financial/mean_unhedged_risk", metrics["mean_unhedged_risk"])
+                    self.logger.record("financial/margin_calls", metrics.get("margin_calls", 0))
+                    self.logger.record("financial/defaults", metrics.get("defaults", 0))
                     
                     # Record state occupancy metrics
                     state_occupancies = metrics["state_occupancy"]

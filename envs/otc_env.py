@@ -115,6 +115,7 @@ class OTCHedgingEnv(gym.Env):
         # Running trackers for callbacks
         self.min_cash = self.cash_balance
         self.rule_violations = 0
+        self.margin_calls = 0
         self.unhedged_risk_sum = 0.0
         self.state_counts = {k: 0 for k in self.state_to_idx.keys()}
         self.state_counts[self.automaton.state] += 1
@@ -123,7 +124,8 @@ class OTCHedgingEnv(gym.Env):
         V_0 = self.trajectories["mtm_profiles"][self.path_idx, 0]
         margin_required = max(V_0, 0.0)
         if margin_required > self.margin_posted and self.automaton.state == "normal":
-            self.automaton.safe_trigger("observe_breach")
+            if self.automaton.safe_trigger("observe_breach"):
+                self.margin_calls += 1
 
         obs = self._get_obs()
         info = {
@@ -198,7 +200,8 @@ class OTCHedgingEnv(gym.Env):
             # Check for new breaches on the advanced day
             margin_required_curr = max(V_curr, 0.0)
             if margin_required_curr > self.margin_posted and self.automaton.state == "normal":
-                self.automaton.safe_trigger("observe_breach")
+                if self.automaton.safe_trigger("observe_breach"):
+                    self.margin_calls += 1
         else:
             # For final step, delta_V is 0
             delta_V = 0.0
@@ -248,7 +251,9 @@ class OTCHedgingEnv(gym.Env):
                 "peak_liquidity": max(0.0, -self.min_cash),
                 "rule_violations": self.rule_violations,
                 "mean_unhedged_risk": mean_unhedged_risk,
-                "state_occupancy": state_occupancy
+                "state_occupancy": state_occupancy,
+                "margin_calls": self.margin_calls,
+                "defaults": 1 if self.automaton.state == "default" else 0
             }
 
         return obs, reward, terminated, truncated, info
